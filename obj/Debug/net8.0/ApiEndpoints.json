@@ -1,0 +1,316 @@
+[
+  {
+    "ContainingType": "ExpenseApplication.Controllers.AccountantController",
+    "Method": "GetExpenseFormAccountant",
+    "RelativePath": "api/Accountant/get-expense-form",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "orderBy",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "searchKeyword",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageNumber",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageSize",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ExpenseApplication.Controllers.AccountantController",
+    "Method": "PayExpenseForm",
+    "RelativePath": "api/Accountant/pay-expense-form",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "expenseForm",
+        "Type": "ExpenseApplication.Data.ViewModels.ExpenseFormPayByAccountant",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ExpenseApplication.Controllers.AdminController",
+    "Method": "GetExpenseForms",
+    "RelativePath": "api/Admin/expense-forms",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "orderBy",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "searchKeyword",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageNumber",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageSize",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ExpenseApplication.Controllers.AdminController",
+    "Method": "GetExpenseHistory",
+    "RelativePath": "api/Admin/expense-history",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "orderBy",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "searchKeyword",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageNumber",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageSize",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ExpenseApplication.Controllers.AdminController",
+    "Method": "UpdateManagerId",
+    "RelativePath": "api/Admin/update-managerid",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "manager",
+        "Type": "ExpenseApplication.Data.ViewModels.ManagerVM",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ExpenseApplication.Controllers.AdminController",
+    "Method": "GetUsers",
+    "RelativePath": "api/Admin/users",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "orderBy",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "searchKeyword",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageNumber",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageSize",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ExpenseApplication.Controllers.AuthenticationController",
+    "Method": "Login",
+    "RelativePath": "api/Authentication/login-user",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "payload",
+        "Type": "ExpenseApplication.Data.ViewModels.LoginVM",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ExpenseApplication.Controllers.AuthenticationController",
+    "Method": "RefreshToken",
+    "RelativePath": "api/Authentication/refresh-token",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "payload",
+        "Type": "ExpenseApplication.Data.ViewModels.RefreshTokenVM",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ExpenseApplication.Controllers.AuthenticationController",
+    "Method": "Register",
+    "RelativePath": "api/Authentication/register-user",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "payload",
+        "Type": "ExpenseApplication.Data.ViewModels.RegisterVM",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ExpenseApplication.Controllers.EmployeeController",
+    "Method": "AddExpenseForm",
+    "RelativePath": "api/Employee/add-expense-form",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "expenseForm",
+        "Type": "ExpenseApplication.Data.ViewModels.ExpenseFormCreateVM",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ExpenseApplication.Controllers.EmployeeController",
+    "Method": "GetExpenseForm",
+    "RelativePath": "api/Employee/get-expense-form",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "orderBy",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "searchKeyword",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageNumber",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageSize",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ExpenseApplication.Controllers.EmployeeController",
+    "Method": "UpdateExpenseForm",
+    "RelativePath": "api/Employee/update-expense-form",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "expenseForm",
+        "Type": "ExpenseApplication.Data.ViewModels.ExpenseFormUpdateEmployeeVM",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ExpenseApplication.Controllers.ManagerController",
+    "Method": "GetExpenseForm",
+    "RelativePath": "api/Manager/get-expense-form",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "orderBy",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "searchKeyword",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageNumber",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageSize",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ExpenseApplication.Controllers.ManagerController",
+    "Method": "UpdateExpenseForm",
+    "RelativePath": "api/Manager/update-expense-form",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "expenseForm",
+        "Type": "ExpenseApplication.Data.ViewModels.ExpenseFormUpdateManagerVM",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]
