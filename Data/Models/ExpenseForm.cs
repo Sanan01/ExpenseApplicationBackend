@@ -17,7 +17,7 @@
 		public string? PaidBy { get; set; }
 
 		// Navigation properties
-		public string? ApplicationUserId { get; set; }
+		public string ApplicationUserId { get; set; }
 		public ApplicationUser? ApplicationUser { get; set; }
 		public List<Expense> Expenses { get; set; }
 	}

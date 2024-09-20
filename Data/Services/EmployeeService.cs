@@ -45,7 +45,7 @@ namespace ExpenseApplication.Data.Services
 			return _expenseForm;
 		}
 
-		public List<ExpenseForm> GetExpenseForms(string userId, string? orderBy, string? searchKeyword, int? pageNumber, int? pageSize)
+		public PaginatedResponse<ExpenseForm> GetExpenseForms(string userId, string? orderBy, string? searchKeyword, int? pageNumber, int? pageSize)
 		{
 			var query = _context.ExpenseForms
 				.Include(e => e.Expenses)
@@ -66,7 +66,15 @@ namespace ExpenseApplication.Data.Services
 
 			int currentPageNumber = pageNumber ?? 1;
 			int currentPageSize = pageSize ?? 10;
-			return PaginatedList<ExpenseForm>.Create(query, currentPageNumber, currentPageSize);
+			var PaginatedList = PaginatedList<ExpenseForm>.Create(query, currentPageNumber, currentPageSize);
+			return new PaginatedResponse<ExpenseForm>
+			{
+				Items = PaginatedList,
+				TotalPages = PaginatedList.TotalPages,
+				PageIndex = PaginatedList.PageIndex,
+				HasNextPage = PaginatedList.HasNextPage,
+				HasPreviousPage = PaginatedList.HasPreviousPage
+			};
 		}
 
 		public ExpenseForm UpdateExpenseForm(ExpenseFormUpdateEmployeeVM expenseForm)

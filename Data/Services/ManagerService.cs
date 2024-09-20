@@ -2,7 +2,6 @@
 using ExpenseApplication.Data.Pagination;
 using ExpenseApplication.Data.ViewModels;
 using Microsoft.EntityFrameworkCore;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace ExpenseApplication.Data.Services
 {
@@ -10,7 +9,7 @@ namespace ExpenseApplication.Data.Services
 	{
 		private readonly ApplicationDbContext _context = context;
 
-		public List<ExpenseForm> GetExpenseForms(string managerId, string? orderBy, string? searchKeyword, int? pageNumber, int? pageSize)
+		public PaginatedResponse<ExpenseForm> GetExpenseForms(string managerId, string? orderBy, string? searchKeyword, int? pageNumber, int? pageSize)
 		{
 			var query = _context.ExpenseForms
 			.Include(e => e.Expenses)
@@ -21,13 +20,13 @@ namespace ExpenseApplication.Data.Services
 					u => u,
 					(e, u) => new { ExpenseForm = e, UserId = u }
 				)
-				.Where(eu => eu.ExpenseForm.Status == "Pending")
+				.Where(eu => eu.ExpenseForm.Status == Status.Pending)
 				.Select(eu => eu.ExpenseForm)
 			.AsQueryable();
 
 			if (!string.IsNullOrEmpty(searchKeyword))
 			{
-				query = query.Where(p => p.Status.Contains(searchKeyword));
+				query = query.Where(p => p.ApplicationUserId.Contains(searchKeyword));
 			}
 
 			query = (orderBy?.ToLower()) switch
@@ -39,7 +38,15 @@ namespace ExpenseApplication.Data.Services
 
 			int currentPageNumber = pageNumber ?? 1;
 			int currentPageSize = pageSize ?? 10;
-			return PaginatedList<ExpenseForm>.Create(query, currentPageNumber, currentPageSize);
+			var PaginatedList = PaginatedList<ExpenseForm>.Create(query, currentPageNumber, currentPageSize);
+			return new PaginatedResponse<ExpenseForm>
+			{
+				Items = PaginatedList,
+				TotalPages = PaginatedList.TotalPages,
+				PageIndex = PaginatedList.PageIndex,
+				HasNextPage = PaginatedList.HasNextPage,
+				HasPreviousPage = PaginatedList.HasPreviousPage
+			};
 		}
 
 		public ExpenseForm UpdateExpenseForm(ExpenseFormUpdateManagerVM expenseForm)
