@@ -13,14 +13,14 @@ namespace ExpenseApplication.Controllers
 	[Authorize(Roles = UserRoles.Accountant)]
 	public class AccountantController(AccountantService accountantService) : ControllerBase
 	{
-		private readonly AccountantService _accountantService = accountantService;
+		private readonly AccountantService accountantService = accountantService;
 
 		[HttpGet("get-expense-form")]
 		public IActionResult GetExpenseFormAccountant(string? orderBy = null, string? searchKeyword = null, int? pageNumber = null, int? pageSize = null)
 		{
 			try
 			{
-				var expenseForm = _accountantService.GetExpenseForms(orderBy, searchKeyword, pageNumber, pageSize);
+				var expenseForm = accountantService.GetExpenseForms(orderBy, searchKeyword, pageNumber, pageSize);
 				var successResponse = new ApiResponse<object>(
 					statusCode: 200,
 					message: "Expense Forms Retrieved Successfully",
@@ -60,7 +60,7 @@ namespace ExpenseApplication.Controllers
 			{
 				expenseForm.PaidBy = userId;
 
-				var updatedExpenseForm = _accountantService.PayExpenseForm(expenseForm);
+				var updatedExpenseForm = accountantService.PayExpenseForm(expenseForm);
 				var successResponse = new ApiResponse<object>(
 					statusCode: 200,
 					message: "Expense paid successfully",

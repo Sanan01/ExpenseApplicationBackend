@@ -12,8 +12,8 @@ namespace ExpenseApplication.Controllers
 	[ApiController]
 	public class AuthenticationController(UserManager<ApplicationUser> userManager, ITokenService tokenService) : ControllerBase
 	{
-		private readonly UserManager<ApplicationUser> _userManager = userManager;
-		private readonly ITokenService _tokenService = tokenService;
+		private readonly UserManager<ApplicationUser> userManager = userManager;
+		private readonly ITokenService tokenService = tokenService;
 
 		[HttpPost("register-user")]
 		public async Task<IActionResult> Register([FromBody] RegisterVM payload)
@@ -21,7 +21,7 @@ namespace ExpenseApplication.Controllers
 			if (!ModelState.IsValid)
 				return BadRequest("Provide all the required fields.");
 
-			var userExists = await _userManager.FindByNameAsync(payload.Username);
+			var userExists = await userManager.FindByNameAsync(payload.Username);
 			if (userExists != null)
 				return BadRequest("User already exists.");
 
@@ -32,7 +32,7 @@ namespace ExpenseApplication.Controllers
 				ManagerId = payload.ManagerId
 			};
 
-			var result = await _userManager.CreateAsync(user, payload.Password);
+			var result = await userManager.CreateAsync(user, payload.Password);
 
 			if (!result.Succeeded)
 				return BadRequest(result.Errors);
@@ -40,16 +40,16 @@ namespace ExpenseApplication.Controllers
 			switch (payload.Role)
 			{
 				case UserRoles.Admin:
-					await _userManager.AddToRoleAsync(user, UserRoles.Admin);
+					await userManager.AddToRoleAsync(user, UserRoles.Admin);
 					break;
 				case UserRoles.Manager:
-					await _userManager.AddToRoleAsync(user, UserRoles.Manager);
+					await userManager.AddToRoleAsync(user, UserRoles.Manager);
 					break;
 				case UserRoles.Accountant:
-					await _userManager.AddToRoleAsync(user, UserRoles.Accountant);
+					await userManager.AddToRoleAsync(user, UserRoles.Accountant);
 					break;
 				default:
-					await _userManager.AddToRoleAsync(user, UserRoles.Employee);
+					await userManager.AddToRoleAsync(user, UserRoles.Employee);
 					break;
 			}
 
@@ -67,17 +67,24 @@ namespace ExpenseApplication.Controllers
 			if (!ModelState.IsValid)
 				return BadRequest("Provide all the required fields.");
 
-			var user = await _userManager.FindByNameAsync(payload.Username);
-			if (user == null || !await _userManager.CheckPasswordAsync(user, payload.Password))
-				return Unauthorized("Invalid Authentication");
+			var user = await userManager.FindByNameAsync(payload.Username);
+			if (user == null || !await userManager.CheckPasswordAsync(user, payload.Password))
+			{
+				var errorResponse = new ApiResponse<object>(
+					statusCode: 400,
+					message: "An error occurred",
+					error: "Invalid username or password."
+				);
+				return StatusCode(400, errorResponse);
+			}
 
-			var token = await _tokenService.GenerateJwtToken(user, "");
+			var token = await tokenService.GenerateJwtToken(user, "");
 
 			LoginResponseVM response = new()
 			{
 				Username = user.UserName,
 				Token = token.Token,
-				Role = (await _userManager.GetRolesAsync(user)).FirstOrDefault(),
+				Role = (await userManager.GetRolesAsync(user)).FirstOrDefault(),
 				ManagerId = user.ManagerId
 			};
 
@@ -94,7 +101,7 @@ namespace ExpenseApplication.Controllers
 		{
 			try
 			{
-				var result = await _tokenService.VerifyAndGenerateTokenAsync(payload);
+				var result = await tokenService.VerifyAndGenerateTokenAsync(payload);
 
 				if (result == null)
 					return BadRequest("Invalid Token");

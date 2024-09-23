@@ -7,15 +7,16 @@ namespace ExpenseApplication.Data.Services
 {
 	public class ManagerService(ApplicationDbContext context)
 	{
-		private readonly ApplicationDbContext _context = context;
+		private readonly ApplicationDbContext context = context;
 
 		public PaginatedResponse<ExpenseForm> GetExpenseForms(string managerId, string? orderBy, string? searchKeyword, int? pageNumber, int? pageSize)
 		{
-			var query = _context.ExpenseForms
+			var query = context.ExpenseForms
 			.Include(e => e.Expenses)
+			.Include(e => e.ApplicationUser)
 			.AsNoTracking()
 			.Join(
-					_context.ApplicationUsers.Where(u => u.ManagerId == managerId).Select(u => u.Id),
+					context.ApplicationUsers.Where(u => u.ManagerId == managerId).Select(u => u.Id),
 					e => e.ApplicationUserId,
 					u => u,
 					(e, u) => new { ExpenseForm = e, UserId = u }
@@ -38,20 +39,20 @@ namespace ExpenseApplication.Data.Services
 
 			int currentPageNumber = pageNumber ?? 1;
 			int currentPageSize = pageSize ?? 10;
-			var PaginatedList = PaginatedList<ExpenseForm>.Create(query, currentPageNumber, currentPageSize);
+			var paginatedList = PaginatedList<ExpenseForm>.Create(query, currentPageNumber, currentPageSize);
 			return new PaginatedResponse<ExpenseForm>
 			{
-				Items = PaginatedList,
-				TotalPages = PaginatedList.TotalPages,
-				PageIndex = PaginatedList.PageIndex,
-				HasNextPage = PaginatedList.HasNextPage,
-				HasPreviousPage = PaginatedList.HasPreviousPage
+				Items = paginatedList,
+				TotalPages = paginatedList.TotalPages,
+				PageIndex = paginatedList.PageIndex,
+				HasNextPage = paginatedList.HasNextPage,
+				HasPreviousPage = paginatedList.HasPreviousPage
 			};
 		}
 
 		public ExpenseForm UpdateExpenseForm(ExpenseFormUpdateManagerVM expenseForm)
 		{
-			var existingExpenseForm = _context.ExpenseForms
+			var existingExpenseForm = context.ExpenseForms
 				.Include(e => e.Expenses)
 				.FirstOrDefault(e => e.Id == expenseForm.Id) ?? throw new KeyNotFoundException("Expense form not found");
 
@@ -73,9 +74,9 @@ namespace ExpenseApplication.Data.Services
 				ExpenseFormId = existingExpenseForm.Id
 			};
 
-			_context.ExpenseHistories.Add(expenseHistory);
-			_context.ExpenseForms.Update(existingExpenseForm);
-			_context.SaveChanges();
+			context.ExpenseHistories.Add(expenseHistory);
+			context.ExpenseForms.Update(existingExpenseForm);
+			context.SaveChanges();
 
 			return existingExpenseForm;
 

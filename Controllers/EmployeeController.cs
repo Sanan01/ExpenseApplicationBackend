@@ -13,7 +13,7 @@ namespace ExpenseApplication.Controllers
 	[Authorize(Roles = UserRoles.Employee)]
 	public class EmployeeController(EmployeeService employeeService) : ControllerBase
 	{
-		private readonly EmployeeService _employeeService = employeeService;
+		private readonly EmployeeService employeeService = employeeService;
 
 		[HttpPost("add-expense-form")]
 		public IActionResult AddExpenseForm([FromBody] ExpenseFormCreateVM expenseForm)
@@ -36,7 +36,7 @@ namespace ExpenseApplication.Controllers
 			{
 				expenseForm.ApplicationUserId = userId;
 
-				var newExpenseForm = _employeeService.AddExpenseForm(expenseForm);
+				var newExpenseForm = employeeService.AddExpenseForm(expenseForm);
 				var successResponse = new ApiResponse<object>(
 					statusCode: 200,
 					message: "Expense Form Created successfully",
@@ -72,7 +72,7 @@ namespace ExpenseApplication.Controllers
 
 			try
 			{
-				var expenseForm = _employeeService.GetExpenseForms(userId, orderBy, searchKeyword, pageNumber, pageSize);
+				var expenseForm = employeeService.GetExpenseForms(userId, orderBy, searchKeyword, pageNumber, pageSize);
 				var successResponse = new ApiResponse<object>(
 					statusCode: 200,
 					message: "Expense Forms Retrieved successfully",
@@ -98,7 +98,7 @@ namespace ExpenseApplication.Controllers
 				return BadRequest(ModelState);
 			try
 			{
-				var updatedExpenseForm = _employeeService.UpdateExpenseForm(expenseForm);
+				var updatedExpenseForm = employeeService.UpdateExpenseForm(expenseForm);
 
 				var successResponse = new ApiResponse<object>(
 					statusCode: 200,

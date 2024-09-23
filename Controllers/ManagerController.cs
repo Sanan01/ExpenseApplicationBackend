@@ -13,7 +13,7 @@ namespace ExpenseApplication.Controllers
 	[Authorize(Roles = UserRoles.Manager)]
 	public class ManagerController(ManagerService managerService) : ControllerBase
 	{
-		private readonly ManagerService _managerService = managerService;
+		private readonly ManagerService managerService = managerService;
 
 		[HttpGet("get-expense-form")]
 		public IActionResult GetExpenseForm(string? orderBy = null, string? searchKeyword = null, int? pageNumber = null, int? pageSize = null)
@@ -32,7 +32,7 @@ namespace ExpenseApplication.Controllers
 
 			try
 			{
-				var expenseForm = _managerService.GetExpenseForms(userId, orderBy, searchKeyword, pageNumber, pageSize);
+				var expenseForm = managerService.GetExpenseForms(userId, orderBy, searchKeyword, pageNumber, pageSize);
 				var successResponse = new ApiResponse<object>(
 					statusCode: 200,
 					message: "Expense retrieved successfully",
@@ -73,7 +73,7 @@ namespace ExpenseApplication.Controllers
 				expenseForm.ApprovedBy = userId;
 				expenseForm.RejectedBy = userId;
 
-				var updatedExpenseForm = _managerService.UpdateExpenseForm(expenseForm);
+				var updatedExpenseForm = managerService.UpdateExpenseForm(expenseForm);
 				var successResponse = new ApiResponse<object>(
 					statusCode: 200,
 					message: "Expense retrieved successfully",

@@ -7,24 +7,24 @@ namespace ExpenseApplication.Data.Services
 {
 	public class AdminService(ApplicationDbContext context)
 	{
-		private readonly ApplicationDbContext _context = context;
+		private readonly ApplicationDbContext context = context;
 
 		public ManagerVM UpdateManagerId(ManagerVM manager)
 		{
-			var user = _context.ApplicationUsers
+			var user = context.ApplicationUsers
 				.FirstOrDefault(e => e.Id == manager.UserId) ?? throw new KeyNotFoundException("User not found");
 
 			user.ManagerId = manager.ManagerId;
 
-			_context.ApplicationUsers.Update(user);
-			_context.SaveChanges();
+			context.ApplicationUsers.Update(user);
+			context.SaveChanges();
 
 			return manager;
 		}
 
 		public PaginatedResponse<ApplicationUser> GetUsers(string? orderBy, string? searchKeyword, int? pageNumber, int? pageSize)
 		{
-			var query = _context.ApplicationUsers.AsQueryable();
+			var query = context.ApplicationUsers.AsQueryable();
 
 			if (!string.IsNullOrEmpty(searchKeyword))
 			{
@@ -39,25 +39,45 @@ namespace ExpenseApplication.Data.Services
 
 			int currentPageNumber = pageNumber ?? 1;
 			int currentPageSize = pageSize ?? 10;
-			var PaginatedList = PaginatedList<ApplicationUser>.Create(query, currentPageNumber, currentPageSize);
+			var paginatedList = PaginatedList<ApplicationUser>.Create(query, currentPageNumber, currentPageSize);
 			return new PaginatedResponse<ApplicationUser>
 			{
-				Items = PaginatedList,
-				TotalPages = PaginatedList.TotalPages,
-				PageIndex = PaginatedList.PageIndex,
-				HasNextPage = PaginatedList.HasNextPage,
-				HasPreviousPage = PaginatedList.HasPreviousPage
+				Items = paginatedList,
+				TotalPages = paginatedList.TotalPages,
+				PageIndex = paginatedList.PageIndex,
+				HasNextPage = paginatedList.HasNextPage,
+				HasPreviousPage = paginatedList.HasPreviousPage
 			};
 		}
 
-		public PaginatedResponse<ExpenseHistory> GetExpenseHistory(string? orderBy, string? searchKeyword, int? pageNumber, int? pageSize)
+		public PaginatedResponse<ExpenseHistoryResponseVM> GetExpenseHistory(string? orderBy, string? searchKeyword, int? pageNumber, int? pageSize)
 		{
-			var query = _context.ExpenseHistories.AsQueryable();
+			// Query ExpenseHistories and include the User data
+			var query = context.ExpenseHistories
+				.Join(
+					context.ApplicationUsers,
+					history => history.UserId,  // Foreign key in ExpenseHistory
+					user => user.Id,            // Primary key in ApplicationUser
+					(history, user) => new ExpenseHistoryResponseVM
+					{
+						Id = history.Id,
+						Action = history.Action,
+						Date = history.Date,
+						Comment = history.Comment,
+						UserId = history.UserId,
+						UserName = user.UserName, // Get the UserName from the joined ApplicationUser
+						ManagerId = history.ManagerId,
+						ExpenseFormId = history.ExpenseFormId
+					}
+				).AsQueryable();
 
+			// Apply search filter if a keyword is provided
 			if (!string.IsNullOrEmpty(searchKeyword))
 			{
 				query = query.Where(p => p.Action.Contains(searchKeyword));
 			}
+
+			// Apply ordering based on the 'orderBy' parameter
 			query = (orderBy?.ToLower()) switch
 			{
 				"asc" => query.OrderBy(p => p.Date),
@@ -65,22 +85,29 @@ namespace ExpenseApplication.Data.Services
 				_ => query.OrderBy(p => p.Date),
 			};
 
+			// Pagination setup
 			int currentPageNumber = pageNumber ?? 1;
 			int currentPageSize = pageSize ?? 10;
-			var PaginatedList = PaginatedList<ExpenseHistory>.Create(query, currentPageNumber, currentPageSize);
-			return new PaginatedResponse<ExpenseHistory>
+			var paginatedList = PaginatedList<ExpenseHistoryResponseVM>.Create(query, currentPageNumber, currentPageSize);
+
+			// Return the paginated response
+			return new PaginatedResponse<ExpenseHistoryResponseVM>
 			{
-				Items = PaginatedList,
-				TotalPages = PaginatedList.TotalPages,
-				PageIndex = PaginatedList.PageIndex,
-				HasNextPage = PaginatedList.HasNextPage,
-				HasPreviousPage = PaginatedList.HasPreviousPage
+				Items = paginatedList,
+				TotalPages = paginatedList.TotalPages,
+				PageIndex = paginatedList.PageIndex,
+				HasNextPage = paginatedList.HasNextPage,
+				HasPreviousPage = paginatedList.HasPreviousPage
 			};
 		}
 
+
 		public PaginatedResponse<ExpenseForm> GetExpenseForms(string? orderBy, string? searchKeyword, int? pageNumber, int? pageSize)
 		{
-			var query = _context.ExpenseForms.Include(e => e.Expenses).AsQueryable();
+			var query = context.ExpenseForms
+				.Include(e => e.Expenses)
+				.Include(e => e.ApplicationUser)
+				.AsQueryable();
 
 			if (!string.IsNullOrEmpty(searchKeyword))
 			{
@@ -95,14 +122,14 @@ namespace ExpenseApplication.Data.Services
 
 			int currentPageNumber = pageNumber ?? 1;
 			int currentPageSize = pageSize ?? 10;
-			var PaginatedList = PaginatedList<ExpenseForm>.Create(query, currentPageNumber, currentPageSize);
+			var paginatedList = PaginatedList<ExpenseForm>.Create(query, currentPageNumber, currentPageSize);
 			return new PaginatedResponse<ExpenseForm>
 			{
-				Items = PaginatedList,
-				TotalPages = PaginatedList.TotalPages,
-				PageIndex = PaginatedList.PageIndex,
-				HasNextPage = PaginatedList.HasNextPage,
-				HasPreviousPage = PaginatedList.HasPreviousPage
+				Items = paginatedList,
+				TotalPages = paginatedList.TotalPages,
+				PageIndex = paginatedList.PageIndex,
+				HasNextPage = paginatedList.HasNextPage,
+				HasPreviousPage = paginatedList.HasPreviousPage
 			};
 		}
 	}

@@ -7,12 +7,13 @@ namespace ExpenseApplication.Data.Services
 {
 	public class AccountantService(ApplicationDbContext context)
 	{
-		private readonly ApplicationDbContext _context = context;
+		private readonly ApplicationDbContext context = context;
 
 		public PaginatedResponse<ExpenseForm> GetExpenseForms(string? orderBy, string? searchKeyword, int? pageNumber, int? pageSize)
 		{
-			var query = _context.ExpenseForms
+			var query = context.ExpenseForms
 				.Include(e => e.Expenses)
+				.Include(e => e.ApplicationUser)
 				.Where(e => e.Status == Status.Approved)
 				.AsQueryable();
 
@@ -43,7 +44,7 @@ namespace ExpenseApplication.Data.Services
 
 		public ExpenseForm PayExpenseForm(ExpenseFormPayByAccountant expenseForm)
 		{
-			var existingExpenseForm = _context.ExpenseForms
+			var existingExpenseForm = context.ExpenseForms
 				.Include(e => e.Expenses)
 				.FirstOrDefault(e => e.Id == expenseForm.Id) ?? throw new KeyNotFoundException("Expense form not found");
 
@@ -62,9 +63,9 @@ namespace ExpenseApplication.Data.Services
 				ExpenseFormId = existingExpenseForm.Id
 			};
 
-			_context.ExpenseHistories.Add(expenseHistory);
-			_context.ExpenseForms.Update(existingExpenseForm);
-			_context.SaveChanges();
+			context.ExpenseHistories.Add(expenseHistory);
+			context.ExpenseForms.Update(existingExpenseForm);
+			context.SaveChanges();
 
 			return existingExpenseForm;
 		}

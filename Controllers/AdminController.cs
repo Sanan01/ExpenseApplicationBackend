@@ -12,14 +12,14 @@ namespace ExpenseApplication.Controllers
 	[Authorize(Roles = UserRoles.Admin)]
 	public class AdminController(AdminService adminService) : ControllerBase
 	{
-		private readonly AdminService _adminService = adminService;
+		private readonly AdminService adminService = adminService;
 
 		[HttpGet("users")]
 		public IActionResult GetUsers(string? orderBy = null, string? searchKeyword = null, int? pageNumber = null, int? pageSize = null)
 		{
 			try
 			{
-				var users = _adminService.GetUsers(orderBy, searchKeyword, pageNumber, pageSize);
+				var users = adminService.GetUsers(orderBy, searchKeyword, pageNumber, pageSize);
 				var successResponse = new ApiResponse<object>(
 					statusCode: 200,
 					message: "Users retrieved successfully",
@@ -43,7 +43,7 @@ namespace ExpenseApplication.Controllers
 		{
 			try
 			{
-				var expenseHistory = _adminService.GetExpenseHistory(orderBy, searchKeyword, pageNumber, pageSize);
+				var expenseHistory = adminService.GetExpenseHistory(orderBy, searchKeyword, pageNumber, pageSize);
 				var successResponse = new ApiResponse<object>(
 					statusCode: 200,
 					message: "Expense history retrieved successfully",
@@ -67,7 +67,7 @@ namespace ExpenseApplication.Controllers
 		{
 			try
 			{
-				var expenseForms = _adminService.GetExpenseForms(orderBy, searchKeyword, pageNumber, pageSize);
+				var expenseForms = adminService.GetExpenseForms(orderBy, searchKeyword, pageNumber, pageSize);
 				var successResponse = new ApiResponse<object>(
 					statusCode: 200,
 					message: "Expense forms retrieved successfully",
@@ -94,7 +94,7 @@ namespace ExpenseApplication.Controllers
 
 			try
 			{
-				var updatedExpenseForm = _adminService.UpdateManagerId(manager);
+				var updatedExpenseForm = adminService.UpdateManagerId(manager);
 				var successResponse = new ApiResponse<object>(
 					statusCode: 200,
 					message: "Manager Id Updated successfully",

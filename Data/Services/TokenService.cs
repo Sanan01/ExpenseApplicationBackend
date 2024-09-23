@@ -1,5 +1,6 @@
 ﻿using ExpenseApplication.Data.Models;
 using ExpenseApplication.Data.ViewModels;
+using ExpenseApplication.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -18,10 +19,10 @@ namespace ExpenseApplication.Data.Services
 	}
 	public class TokenService(IConfiguration configuration, ApplicationDbContext context, TokenValidationParameters tokenValidationParameters, UserManager<ApplicationUser> userManager) : ITokenService
 	{
-		private readonly IConfiguration _configuration = configuration;
-		private readonly ApplicationDbContext _context = context;
-		private readonly TokenValidationParameters _tokenValidationParameters = tokenValidationParameters;
-		private readonly UserManager<ApplicationUser> _userManager = userManager;
+		private readonly IConfiguration configuration = configuration;
+		private readonly ApplicationDbContext context = context;
+		private readonly TokenValidationParameters tokenValidationParameters = tokenValidationParameters;
+		private readonly UserManager<ApplicationUser> userManager = userManager;
 		public async Task<AuthResultVM> GenerateJwtToken(ApplicationUser user, string existingRefreshToken)
 		{
 			var authClaims = new List<Claim>
@@ -33,7 +34,7 @@ namespace ExpenseApplication.Data.Services
 				new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
 			};
 
-			var userRoles = await _userManager.GetRolesAsync(user);
+			var userRoles = await userManager.GetRolesAsync(user);
 			foreach (var userRole in userRoles)
 			{
 				authClaims.Add(new Claim(ClaimTypes.Role, userRole));
@@ -58,12 +59,12 @@ namespace ExpenseApplication.Data.Services
 
 		public JwtSecurityToken CreateJwtSecurityToken(IEnumerable<Claim> authClaims)
 		{
-			var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"]));
+			var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:Key"]));
 
 			return new JwtSecurityToken(
-				issuer: _configuration["JwtSettings:Issuer"],
-				audience: _configuration["JwtSettings:Audience"],
-				expires: DateTime.UtcNow.AddMinutes(Convert.ToInt32(_configuration["JwtSettings:ExpiryMinutes"])),
+				issuer: configuration["JwtSettings:Issuer"],
+				audience: configuration["JwtSettings:Audience"],
+				expires: DateTime.UtcNow.AddMinutes(Convert.ToInt32(configuration["JwtSettings:ExpiryMinutes"])),
 				claims: authClaims,
 				signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
 			);
@@ -81,8 +82,8 @@ namespace ExpenseApplication.Data.Services
 				Token = Guid.NewGuid().ToString()
 			};
 
-			await _context.RefreshTokens.AddAsync(refreshToken);
-			await _context.SaveChangesAsync();
+			await context.RefreshTokens.AddAsync(refreshToken);
+			await context.SaveChangesAsync();
 
 			return refreshToken;
 		}
@@ -92,11 +93,11 @@ namespace ExpenseApplication.Data.Services
 			var jwtTokenHandler = new JwtSecurityTokenHandler();
 			try
 			{
-				var tokenVerification = jwtTokenHandler.ValidateToken(payload.Token, _tokenValidationParameters, out var validatedToken);
+				var tokenVerification = jwtTokenHandler.ValidateToken(payload.Token, tokenValidationParameters, out var validatedToken);
 
 				if (validatedToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
 				{
-					return null;
+					throw new TokenServiceException("Invalid token algorithm.");
 				}
 
 				var utcExpiryDate = long.Parse(tokenVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp)?.Value ?? "0");
@@ -104,33 +105,33 @@ namespace ExpenseApplication.Data.Services
 
 				if (expiryDate > DateTime.UtcNow)
 				{
-					throw new Exception("Token has not expired yet.");
+					throw new TokenServiceException("Token has not expired yet.");
 				}
 
-				var storedRefreshToken = await _context.RefreshTokens.FirstOrDefaultAsync(x => x.Token == payload.RefreshToken) ?? throw new Exception("Refresh token does not exist.");
+				var storedRefreshToken = await context.RefreshTokens.FirstOrDefaultAsync(x => x.Token == payload.RefreshToken) ?? throw new Exception("Refresh token does not exist.");
 				var jti = tokenVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti)?.Value;
 
 				if (storedRefreshToken.JwtId != jti)
 				{
-					throw new Exception("Refresh token does not match JWT token.");
+					throw new TokenServiceException("Refresh token does not match JWT token.");
 				}
 
 				if (storedRefreshToken.ExpiryDate < DateTime.UtcNow)
 				{
-					throw new Exception("Refresh token has expired.");
+					throw new TokenServiceException("Refresh token has expired.");
 				}
 
 				if (storedRefreshToken.IsRevoked)
 				{
-					throw new Exception("Refresh token has been revoked.");
+					throw new TokenServiceException("Refresh token has been revoked.");
 				}
 
-				var user = await _userManager.FindByIdAsync(storedRefreshToken.UserId);
-				return user == null ? throw new Exception("User does not exist.") : await GenerateJwtToken(user, payload.RefreshToken);
+				var user = await userManager.FindByIdAsync(storedRefreshToken.UserId);
+				return user == null ? throw new TokenServiceException("User does not exist.") : await GenerateJwtToken(user, payload.RefreshToken);
 			}
 			catch (Exception ex)
 			{
-				throw new Exception(ex.Message);
+				throw new TokenServiceException("An error occurred while verifying or generating the token.", ex);
 			}
 		}
 

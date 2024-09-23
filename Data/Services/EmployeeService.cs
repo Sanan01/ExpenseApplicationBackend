@@ -7,21 +7,21 @@ namespace ExpenseApplication.Data.Services
 {
 	public class EmployeeService(ApplicationDbContext context)
 	{
-		private readonly ApplicationDbContext _context = context;
-		public ExpenseForm AddExpenseForm(ExpenseFormCreateVM expenseForm)
+		private readonly ApplicationDbContext context = context;
+		public ExpenseForm AddExpenseForm(ExpenseFormCreateVM expenseFormVM)
 		{
-			ExpenseForm _expenseForm = new()
+			ExpenseForm expenseForm = new()
 			{
 				Status = Status.Pending,
-				Currency = expenseForm.Currency,
-				TotalAmount = expenseForm.TotalAmount,
+				Currency = expenseFormVM.Currency,
+				TotalAmount = expenseFormVM.TotalAmount,
 				DateCreated = DateTime.Now,
 				DateUpdated = DateTime.Now,
 				DateApproved = DateTime.MinValue,
 				DateRejected = DateTime.MinValue,
 				DatePaidAt = DateTime.MinValue,
-				ApplicationUserId = expenseForm.ApplicationUserId,
-				Expenses = expenseForm.Expenses.Select(expense => new Expense
+				ApplicationUserId = expenseFormVM.ApplicationUserId,
+				Expenses = expenseFormVM.Expenses.Select(expense => new Expense
 				{
 					Type = expense.Type,
 					Title = expense.Title,
@@ -34,21 +34,22 @@ namespace ExpenseApplication.Data.Services
 			{
 				Action = "Created",
 				Date = DateTime.Now,
-				Comment = $"Created by {_expenseForm.ApplicationUserId}",
-				UserId = _expenseForm.ApplicationUserId,
-				ExpenseFormId = _expenseForm.Id
+				Comment = $"Created by {expenseForm.ApplicationUserId}",
+				UserId = expenseForm.ApplicationUserId,
+				ExpenseFormId = expenseForm.Id
 			};
 
-			_context.ExpenseHistories.Add(expenseHistory);
-			_context.ExpenseForms.Add(_expenseForm);
-			_context.SaveChanges();
-			return _expenseForm;
+			context.ExpenseHistories.Add(expenseHistory);
+			context.ExpenseForms.Add(expenseForm);
+			context.SaveChanges();
+			return expenseForm;
 		}
 
 		public PaginatedResponse<ExpenseForm> GetExpenseForms(string userId, string? orderBy, string? searchKeyword, int? pageNumber, int? pageSize)
 		{
-			var query = _context.ExpenseForms
+			var query = context.ExpenseForms
 				.Include(e => e.Expenses)
+				.Include(e => e.ApplicationUser)
 				.Where(e => e.ApplicationUserId == userId)
 				.AsQueryable();
 
@@ -66,29 +67,29 @@ namespace ExpenseApplication.Data.Services
 
 			int currentPageNumber = pageNumber ?? 1;
 			int currentPageSize = pageSize ?? 10;
-			var PaginatedList = PaginatedList<ExpenseForm>.Create(query, currentPageNumber, currentPageSize);
+			var paginatedList = PaginatedList<ExpenseForm>.Create(query, currentPageNumber, currentPageSize);
 			return new PaginatedResponse<ExpenseForm>
 			{
-				Items = PaginatedList,
-				TotalPages = PaginatedList.TotalPages,
-				PageIndex = PaginatedList.PageIndex,
-				HasNextPage = PaginatedList.HasNextPage,
-				HasPreviousPage = PaginatedList.HasPreviousPage
+				Items = paginatedList,
+				TotalPages = paginatedList.TotalPages,
+				PageIndex = paginatedList.PageIndex,
+				HasNextPage = paginatedList.HasNextPage,
+				HasPreviousPage = paginatedList.HasPreviousPage
 			};
 		}
 
-		public ExpenseForm UpdateExpenseForm(ExpenseFormUpdateEmployeeVM expenseForm)
+		public ExpenseForm UpdateExpenseForm(ExpenseFormUpdateEmployeeVM expenseFormVM)
 		{
-			var existingExpenseForm = _context.ExpenseForms
+			var existingExpenseForm = context.ExpenseForms
 				.Include(e => e.Expenses)
-				.FirstOrDefault(e => e.Id == expenseForm.Id) ?? throw new KeyNotFoundException("Expense form not found");
+				.FirstOrDefault(e => e.Id == expenseFormVM.Id) ?? throw new KeyNotFoundException("Expense form not found");
 
 			existingExpenseForm.Status = Status.Pending;
-			existingExpenseForm.Currency = expenseForm.Currency;
-			existingExpenseForm.TotalAmount = expenseForm.TotalAmount;
+			existingExpenseForm.Currency = expenseFormVM.Currency;
+			existingExpenseForm.TotalAmount = expenseFormVM.TotalAmount;
 			existingExpenseForm.DateUpdated = DateTime.Now;
 
-			foreach (var updatedExpense in expenseForm.Expenses)
+			foreach (var updatedExpense in expenseFormVM.Expenses)
 			{
 				var existingExpense = existingExpenseForm.Expenses
 					.FirstOrDefault(e => e.Id == updatedExpense.Id);
@@ -116,13 +117,13 @@ namespace ExpenseApplication.Data.Services
 			}
 
 			// Remove expenses that are no longer part of the update (optional)
-			var expenseIdsToKeep = expenseForm.Expenses.Select(e => e.Id).ToHashSet();
+			var expenseIdsToKeep = expenseFormVM.Expenses.Select(e => e.Id).ToHashSet();
 			var expensesToRemove = existingExpenseForm.Expenses
 				.Where(e => !expenseIdsToKeep.Contains(e.Id)).ToList();
 
 			foreach (var expenseToRemove in expensesToRemove)
 			{
-				_context.Expense.Remove(expenseToRemove);
+				context.Expense.Remove(expenseToRemove);
 			}
 
 			var expenseHistory = new ExpenseHistory
@@ -135,9 +136,9 @@ namespace ExpenseApplication.Data.Services
 				ExpenseFormId = existingExpenseForm.Id
 			};
 
-			_context.ExpenseHistories.Add(expenseHistory);
-			_context.ExpenseForms.Update(existingExpenseForm);
-			_context.SaveChanges();
+			context.ExpenseHistories.Add(expenseHistory);
+			context.ExpenseForms.Update(existingExpenseForm);
+			context.SaveChanges();
 
 			return existingExpenseForm;
 		}
