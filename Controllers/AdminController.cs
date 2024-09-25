@@ -10,9 +10,10 @@ namespace ExpenseApplication.Controllers
 	[Route("api/[controller]")]
 	[ApiController]
 	[Authorize(Roles = UserRoles.Admin)]
-	public class AdminController(AdminService adminService) : ControllerBase
+	public class AdminController(AdminService adminService, ApiResponseService apiResponseService) : ControllerBase
 	{
 		private readonly AdminService adminService = adminService;
+		private readonly ApiResponseService apiResponseService = apiResponseService;
 
 		[HttpGet("users")]
 		public IActionResult GetUsers(string? orderBy = null, string? searchKeyword = null, int? pageNumber = null, int? pageSize = null)
@@ -20,21 +21,11 @@ namespace ExpenseApplication.Controllers
 			try
 			{
 				var users = adminService.GetUsers(orderBy, searchKeyword, pageNumber, pageSize);
-				var successResponse = new ApiResponse<object>(
-					statusCode: 200,
-					message: "Users retrieved successfully",
-					data: users
-				);
-				return Ok(successResponse);
+				return apiResponseService.ApiResponseSuccess("Users retrieved successfully", users);
 			}
 			catch (Exception ex)
 			{
-				var errorResponse = new ApiResponse<object>(
-					statusCode: 500,
-					message: "An error occurred",
-					error: ex.Message
-				);
-				return StatusCode(500, errorResponse);
+				return apiResponseService.ApiResponseError(ex.Message);
 			}
 		}
 
@@ -44,21 +35,11 @@ namespace ExpenseApplication.Controllers
 			try
 			{
 				var expenseHistory = adminService.GetExpenseHistory(orderBy, searchKeyword, pageNumber, pageSize);
-				var successResponse = new ApiResponse<object>(
-					statusCode: 200,
-					message: "Expense history retrieved successfully",
-					data: expenseHistory
-				);
-				return Ok(successResponse);
+				return apiResponseService.ApiResponseSuccess("Expense history retrieved successfully", expenseHistory);
 			}
 			catch (Exception ex)
 			{
-				var errorResponse = new ApiResponse<object>(
-					statusCode: 500,
-					message: "An error occurred",
-					error: ex.Message
-				);
-				return StatusCode(500, errorResponse);
+				return apiResponseService.ApiResponseError(ex.Message);
 			}
 		}
 
@@ -68,21 +49,11 @@ namespace ExpenseApplication.Controllers
 			try
 			{
 				var expenseForms = adminService.GetExpenseForms(orderBy, searchKeyword, pageNumber, pageSize);
-				var successResponse = new ApiResponse<object>(
-					statusCode: 200,
-					message: "Expense forms retrieved successfully",
-					data: expenseForms
-				);
-				return Ok(successResponse);
+				return apiResponseService.ApiResponseSuccess("Expense forms retrieved successfully", expenseForms);
 			}
 			catch (Exception ex)
 			{
-				var errorResponse = new ApiResponse<object>(
-					statusCode: 500,
-					message: "An error occurred",
-					error: ex.Message
-				);
-				return StatusCode(500, errorResponse);
+				return apiResponseService.ApiResponseError(ex.Message);
 			}
 		}
 
@@ -95,21 +66,11 @@ namespace ExpenseApplication.Controllers
 			try
 			{
 				var updatedExpenseForm = adminService.UpdateManagerId(manager);
-				var successResponse = new ApiResponse<object>(
-					statusCode: 200,
-					message: "Manager Id Updated successfully",
-					data: updatedExpenseForm
-				);
-				return Ok(successResponse);
+				return apiResponseService.ApiResponseSuccess("Manager Id Updated successfully", updatedExpenseForm);
 			}
 			catch (Exception ex)
 			{
-				var errorResponse = new ApiResponse<object>(
-					statusCode: 500,
-					message: "An error occurred",
-					error: ex.Message
-				);
-				return StatusCode(500, errorResponse);
+				return apiResponseService.ApiResponseError(ex.Message);
 			}
 		}
 	}

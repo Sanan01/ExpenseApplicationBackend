@@ -87,7 +87,7 @@ namespace ExpenseApplication.Data.Services
 
 			// Pagination setup
 			int currentPageNumber = pageNumber ?? 1;
-			int currentPageSize = pageSize ?? 10;
+			int currentPageSize = pageSize ?? 100;
 			var paginatedList = PaginatedList<ExpenseHistoryResponseVM>.Create(query, currentPageNumber, currentPageSize);
 
 			// Return the paginated response
@@ -121,7 +121,7 @@ namespace ExpenseApplication.Data.Services
 			};
 
 			int currentPageNumber = pageNumber ?? 1;
-			int currentPageSize = pageSize ?? 10;
+			int currentPageSize = pageSize ?? 100;
 			var paginatedList = PaginatedList<ExpenseForm>.Create(query, currentPageNumber, currentPageSize);
 			return new PaginatedResponse<ExpenseForm>
 			{

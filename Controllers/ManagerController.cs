@@ -4,16 +4,16 @@ using ExpenseApplication.Data.Services;
 using ExpenseApplication.Data.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ExpenseApplication.CustomApiResponse;
 
 namespace ExpenseApplication.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
 	[Authorize(Roles = UserRoles.Manager)]
-	public class ManagerController(ManagerService managerService) : ControllerBase
+	public class ManagerController(ManagerService managerService, ApiResponseService apiResponseService) : ControllerBase
 	{
 		private readonly ManagerService managerService = managerService;
+		private readonly ApiResponseService apiResponseService = apiResponseService;
 
 		[HttpGet("get-expense-form")]
 		public IActionResult GetExpenseForm(string? orderBy = null, string? searchKeyword = null, int? pageNumber = null, int? pageSize = null)
@@ -22,32 +22,17 @@ namespace ExpenseApplication.Controllers
 
 			if (userId == null)
 			{
-				var errorResponse = new ApiResponse<object>(
-					statusCode: 404,
-					message: "User ID not found",
-					error: "No Manager with the given manager ID was found."
-				);
-				return NotFound(errorResponse);
+				return apiResponseService.ApiResponseNotFound("User ID not found", "No Manager with the given manager ID was found.");
 			}
 
 			try
 			{
 				var expenseForm = managerService.GetExpenseForms(userId, orderBy, searchKeyword, pageNumber, pageSize);
-				var successResponse = new ApiResponse<object>(
-					statusCode: 200,
-					message: "Expense retrieved successfully",
-					data: expenseForm
-				);
-				return Ok(successResponse);
+				return apiResponseService.ApiResponseSuccess("Expense Forms Retrieved Successfully", expenseForm);
 			}
 			catch (Exception ex)
 			{
-				var errorResponse = new ApiResponse<object>(
-					statusCode: 500,
-					message: "An error occurred",
-					error: ex.Message
-				);
-				return StatusCode(500, errorResponse);
+				return apiResponseService.ApiResponseError(ex.Message);
 			}
 		}
 
@@ -60,12 +45,7 @@ namespace ExpenseApplication.Controllers
 
 			if (userId == null)
 			{
-				var errorResponse = new ApiResponse<object>(
-					statusCode: 404,
-					message: "User ID not found",
-					error: "No Manager with the given manager ID was found."
-				);
-				return NotFound(errorResponse);
+				return apiResponseService.ApiResponseNotFound("User ID not found", "No Manager with the given manager ID was found.");
 			}
 
 			try
@@ -74,21 +54,11 @@ namespace ExpenseApplication.Controllers
 				expenseForm.RejectedBy = userId;
 
 				var updatedExpenseForm = managerService.UpdateExpenseForm(expenseForm);
-				var successResponse = new ApiResponse<object>(
-					statusCode: 200,
-					message: "Expense retrieved successfully",
-					data: updatedExpenseForm
-				);
-				return Ok(successResponse);
+				return apiResponseService.ApiResponseSuccess("Expense updated successfully", updatedExpenseForm);
 			}
 			catch (Exception ex)
 			{
-				var errorResponse = new ApiResponse<object>(
-					statusCode: 500,
-					message: "An error occurred",
-					error: ex.Message
-				);
-				return StatusCode(500, errorResponse);
+				return apiResponseService.ApiResponseError(ex.Message);
 			}
 		}
 	}

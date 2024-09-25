@@ -4,32 +4,28 @@ using ExpenseApplication.Data.Services;
 using ExpenseApplication.Data.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ExpenseApplication.CustomApiResponse;
 
 namespace ExpenseApplication.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
 	[Authorize(Roles = UserRoles.Employee)]
-	public class EmployeeController(EmployeeService employeeService) : ControllerBase
+	public class EmployeeController(EmployeeService employeeService, ApiResponseService apiResponseService) : ControllerBase
 	{
 		private readonly EmployeeService employeeService = employeeService;
+		private readonly ApiResponseService apiResponseService = apiResponseService;
 
 		[HttpPost("add-expense-form")]
 		public IActionResult AddExpenseForm([FromBody] ExpenseFormCreateVM expenseForm)
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
+
 			var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
 			if (userId == null)
 			{
-				var errorResponse = new ApiResponse<object>(
-					statusCode: 404,
-					message: "User ID not found",
-					error: "No Employee with the given user ID was found."
-				);
-				return NotFound(errorResponse);
+				return apiResponseService.ApiResponseNotFound("User ID not found", "No Employee with the given user ID was found.");
 			}
 
 			try
@@ -37,21 +33,11 @@ namespace ExpenseApplication.Controllers
 				expenseForm.ApplicationUserId = userId;
 
 				var newExpenseForm = employeeService.AddExpenseForm(expenseForm);
-				var successResponse = new ApiResponse<object>(
-					statusCode: 200,
-					message: "Expense Form Created successfully",
-					data: newExpenseForm
-				);
-				return Ok(successResponse);
+				return apiResponseService.ApiResponseSuccess("Expense Form Created successfully", newExpenseForm);
 			}
 			catch (Exception ex)
 			{
-				var errorResponse = new ApiResponse<object>(
-					statusCode: 500,
-					message: "An error occurred",
-					error: ex.Message
-				);
-				return StatusCode(500, errorResponse);
+				return apiResponseService.ApiResponseError(ex.Message);
 			}
 		}
 
@@ -62,32 +48,17 @@ namespace ExpenseApplication.Controllers
 
 			if (userId == null)
 			{
-				var errorResponse = new ApiResponse<object>(
-					statusCode: 404,
-					message: "User ID not found",
-					error: "No Employee with the given user ID was found."
-				);
-				return NotFound(errorResponse);
+				return apiResponseService.ApiResponseNotFound("User ID not found", "No Employee with the given user ID was found.");
 			}
 
 			try
 			{
 				var expenseForm = employeeService.GetExpenseForms(userId, orderBy, searchKeyword, pageNumber, pageSize);
-				var successResponse = new ApiResponse<object>(
-					statusCode: 200,
-					message: "Expense Forms Retrieved successfully",
-					data: expenseForm
-				);
-				return Ok(successResponse);
+				return apiResponseService.ApiResponseSuccess("Expense Forms Retrieved Successfully", expenseForm);
 			}
 			catch (Exception ex)
 			{
-				var errorResponse = new ApiResponse<object>(
-					statusCode: 500,
-					message: "An error occurred",
-					error: ex.Message
-				);
-				return StatusCode(500, errorResponse);
+				return apiResponseService.ApiResponseError(ex.Message);
 			}
 		}
 
@@ -99,22 +70,11 @@ namespace ExpenseApplication.Controllers
 			try
 			{
 				var updatedExpenseForm = employeeService.UpdateExpenseForm(expenseForm);
-
-				var successResponse = new ApiResponse<object>(
-					statusCode: 200,
-					message: "Expense Form Updated successfully",
-					data: updatedExpenseForm
-				);
-				return Ok(successResponse);
+				return apiResponseService.ApiResponseSuccess("Expense Form Updated successfully", updatedExpenseForm);
 			}
 			catch (Exception ex)
 			{
-				var errorResponse = new ApiResponse<object>(
-					statusCode: 500,
-					message: "An error occurred",
-					error: ex.Message
-				);
-				return StatusCode(500, errorResponse);
+				return apiResponseService.ApiResponseError(ex.Message);
 			}
 		}
 	}

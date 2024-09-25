@@ -1,6 +1,4 @@
-﻿using Azure;
-using ExpenseApplication.CustomApiResponse;
-using ExpenseApplication.Data.Models;
+﻿using ExpenseApplication.Data.Models;
 using ExpenseApplication.Data.Services;
 using ExpenseApplication.Data.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -10,20 +8,21 @@ namespace ExpenseApplication.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
-	public class AuthenticationController(UserManager<ApplicationUser> userManager, ITokenService tokenService) : ControllerBase
+	public class AuthenticationController(UserManager<ApplicationUser> userManager, ITokenService tokenService, ApiResponseService apiResponseService) : ControllerBase
 	{
 		private readonly UserManager<ApplicationUser> userManager = userManager;
 		private readonly ITokenService tokenService = tokenService;
+		private readonly ApiResponseService apiResponseService = apiResponseService;
 
 		[HttpPost("register-user")]
 		public async Task<IActionResult> Register([FromBody] RegisterVM payload)
 		{
 			if (!ModelState.IsValid)
-				return BadRequest("Provide all the required fields.");
+				return apiResponseService.ApiResponseBadRequest("Provide all the required fields.");
 
 			var userExists = await userManager.FindByNameAsync(payload.Username);
 			if (userExists != null)
-				return BadRequest("User already exists.");
+				return apiResponseService.ApiResponseBadRequest("User already exists.");
 
 			var user = new ApplicationUser
 			{
@@ -52,12 +51,7 @@ namespace ExpenseApplication.Controllers
 					await userManager.AddToRoleAsync(user, UserRoles.Employee);
 					break;
 			}
-
-			var successResponse = new ApiResponse<object>(
-					statusCode: 200,
-					message: "User registered successfully"
-				);
-			return Ok(successResponse);
+			return apiResponseService.ApiResponseSuccess("User registered successfully");
 		}
 
 
@@ -65,17 +59,12 @@ namespace ExpenseApplication.Controllers
 		public async Task<IActionResult> Login([FromBody] LoginVM payload)
 		{
 			if (!ModelState.IsValid)
-				return BadRequest("Provide all the required fields.");
+				return apiResponseService.ApiResponseBadRequest("Provide all the required fields.");
 
 			var user = await userManager.FindByNameAsync(payload.Username);
 			if (user == null || !await userManager.CheckPasswordAsync(user, payload.Password))
 			{
-				var errorResponse = new ApiResponse<object>(
-					statusCode: 400,
-					message: "An error occurred",
-					error: "Invalid username or password."
-				);
-				return StatusCode(400, errorResponse);
+				return apiResponseService.ApiResponseBadRequest("Invalid username or password.");
 			}
 
 			var token = await tokenService.GenerateJwtToken(user, "");
@@ -87,13 +76,7 @@ namespace ExpenseApplication.Controllers
 				Role = (await userManager.GetRolesAsync(user)).FirstOrDefault(),
 				ManagerId = user.ManagerId
 			};
-
-			var successResponse = new ApiResponse<object>(
-					statusCode: 200,
-					message: "User logged in successfully",
-					data: response
-				);
-			return Ok(successResponse);
+			return apiResponseService.ApiResponseSuccess("User logged in successfully", response);
 		}
 
 		[HttpPost("refresh-token")]
@@ -104,13 +87,13 @@ namespace ExpenseApplication.Controllers
 				var result = await tokenService.VerifyAndGenerateTokenAsync(payload);
 
 				if (result == null)
-					return BadRequest("Invalid Token");
+					return apiResponseService.ApiResponseBadRequest("Invalid Token");
 
 				return Ok(result);
 			}
 			catch (Exception ex)
 			{
-				return BadRequest(ex.Message);
+				return apiResponseService.ApiResponseBadRequest(ex.Message);
 			}
 		}
 	}

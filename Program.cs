@@ -16,13 +16,16 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
 	options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+
+// Add services to the container.
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<AdminService>();
 builder.Services.AddScoped<EmployeeService>();
 builder.Services.AddScoped<AccountantService>();
 builder.Services.AddScoped<ManagerService>();
+builder.Services.AddScoped<ApiResponseService>();
 
-// Add services to the container.
 builder.Services.AddControllers();
 
 // JWT Configuration
@@ -110,7 +113,6 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // CORS Configuration
-
 builder.Services.AddCors(options =>
 {
 	options.AddPolicy("AllowAllOrigins", options =>

@@ -11,9 +11,10 @@ namespace ExpenseApplication.Controllers
 	[Route("api/[controller]")]
 	[ApiController]
 	[Authorize(Roles = UserRoles.Accountant)]
-	public class AccountantController(AccountantService accountantService) : ControllerBase
+	public class AccountantController(AccountantService accountantService, ApiResponseService apiResponseService) : ControllerBase
 	{
 		private readonly AccountantService accountantService = accountantService;
+		private readonly ApiResponseService apiResponseService = apiResponseService;
 
 		[HttpGet("get-expense-form")]
 		public IActionResult GetExpenseFormAccountant(string? orderBy = null, string? searchKeyword = null, int? pageNumber = null, int? pageSize = null)
@@ -21,21 +22,11 @@ namespace ExpenseApplication.Controllers
 			try
 			{
 				var expenseForm = accountantService.GetExpenseForms(orderBy, searchKeyword, pageNumber, pageSize);
-				var successResponse = new ApiResponse<object>(
-					statusCode: 200,
-					message: "Expense Forms Retrieved Successfully",
-					data: expenseForm
-				);
-				return Ok(successResponse);
+				return apiResponseService.ApiResponseSuccess("Expense Forms Retrieved Successfully", expenseForm);
 			}
 			catch (Exception ex)
 			{
-				var errorResponse = new ApiResponse<object>(
-					statusCode: 500,
-					message: "An error occurred",
-					error: ex.Message
-				);
-				return StatusCode(500, errorResponse);
+				return apiResponseService.ApiResponseError(ex.Message);
 			}
 		}
 
@@ -48,12 +39,7 @@ namespace ExpenseApplication.Controllers
 
 			if (userId == null)
 			{
-				var errorResponse = new ApiResponse<object>(
-					statusCode: 404,
-					message: "User ID not found",
-					error: "No Accountant with the given user ID was found."
-				);
-				return NotFound(errorResponse);
+				return apiResponseService.ApiResponseNotFound("User ID not found", "No Accountant with the given user ID was found.");
 			}
 
 			try
@@ -61,21 +47,11 @@ namespace ExpenseApplication.Controllers
 				expenseForm.PaidBy = userId;
 
 				var updatedExpenseForm = accountantService.PayExpenseForm(expenseForm);
-				var successResponse = new ApiResponse<object>(
-					statusCode: 200,
-					message: "Expense paid successfully",
-					data: updatedExpenseForm
-				);
-				return Ok(successResponse);
+				return apiResponseService.ApiResponseSuccess("Expense paid successfully", updatedExpenseForm);
 			}
 			catch (Exception ex)
 			{
-				var errorResponse = new ApiResponse<object>(
-					statusCode: 500,
-					message: "An error occurred",
-					error: ex.Message
-				);
-				return StatusCode(500, errorResponse);
+				return apiResponseService.ApiResponseError(ex.Message);
 			}
 		}
 	}
