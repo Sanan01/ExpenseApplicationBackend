@@ -27,7 +27,7 @@ namespace ExpenseApplication.Data.Services
 
 			if (!string.IsNullOrEmpty(searchKeyword))
 			{
-				query = query.Where(p => p.ApplicationUserId.Contains(searchKeyword));
+				query = query.Where(p => p.ApplicationUser.UserName.Contains(searchKeyword));
 			}
 
 			query = (orderBy?.ToLower()) switch

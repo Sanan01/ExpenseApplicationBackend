@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ExpenseApplication.Migrations
 {
     /// <inheritdoc />
-    public partial class SchemaReady : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -58,11 +58,11 @@ namespace ExpenseApplication.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Action = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Comment = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ManagerId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ExpenseFormId = table.Column<int>(type: "int", nullable: false)
+                    ExpenseFormId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -183,13 +183,13 @@ namespace ExpenseApplication.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Currency = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DateUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DateApproved = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DateRejected = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DateUpdated = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DateApproved = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DateRejected = table.Column<DateTime>(type: "datetime2", nullable: true),
                     RejectionReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DatePaidAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DatePaidAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ApprovedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     RejectedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PaidBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -239,7 +239,7 @@ namespace ExpenseApplication.Migrations
                     Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     ExpenseFormId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>

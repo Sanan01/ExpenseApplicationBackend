@@ -141,19 +141,19 @@ namespace ExpenseApplication.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("DateApproved")
+                    b.Property<DateTime?>("DateApproved")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("DatePaidAt")
+                    b.Property<DateTime?>("DatePaidAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("DateRejected")
+                    b.Property<DateTime?>("DateRejected")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("DateUpdated")
+                    b.Property<DateTime?>("DateUpdated")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("PaidBy")
@@ -182,11 +182,11 @@ namespace ExpenseApplication.Migrations
 
             modelBuilder.Entity("ExpenseApplication.Data.Models.ExpenseHistory", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int?>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int?>("Id"));
 
                     b.Property<string>("Action")
                         .IsRequired()
@@ -195,10 +195,10 @@ namespace ExpenseApplication.Migrations
                     b.Property<string>("Comment")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("Date")
+                    b.Property<DateTime?>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ExpenseFormId")
+                    b.Property<int?>("ExpenseFormId")
                         .HasColumnType("int");
 
                     b.Property<string>("ManagerId")
@@ -383,13 +383,11 @@ namespace ExpenseApplication.Migrations
 
             modelBuilder.Entity("ExpenseApplication.Data.Models.Expense", b =>
                 {
-                    b.HasOne("ExpenseApplication.Data.Models.ExpenseForm", "ExpenseForm")
+                    b.HasOne("ExpenseApplication.Data.Models.ExpenseForm", null)
                         .WithMany("Expenses")
                         .HasForeignKey("ExpenseFormId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("ExpenseForm");
                 });
 
             modelBuilder.Entity("ExpenseApplication.Data.Models.ExpenseForm", b =>
